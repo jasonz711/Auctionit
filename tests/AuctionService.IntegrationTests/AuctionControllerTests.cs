@@ -73,7 +73,7 @@ public class AuctionControllerTests : IClassFixture<CustomWebAppFactory>, IAsync
     public async Task CreateAuction_WithNoAuth_ShouldReturn401()
     {
         // arrange
-        var auction = new CreateAuctionDto {Make = "test"};
+        var auction = new CreateAuctionDto { Make = "test" };
         //act
         var response = await _httpClient.PostAsJsonAsync($"api/auctions", auction);
 
@@ -94,6 +94,46 @@ public class AuctionControllerTests : IClassFixture<CustomWebAppFactory>, IAsync
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var createdAuction = await response.Content.ReadFromJsonAsync<AuctionDto>();
         Assert.Equal("bob", createdAuction.Seller);
+    }
+
+    [Fact]
+    public async Task CreateAuction_WithInvalidCreateAuctionDto_ShouldReturn400()
+    {
+        // arrange
+        var auction = GetAuctionForCreate();
+        auction.Make = null;
+        _httpClient.SetFakeJwtBearerToken(AuthHelper.GetBearerForUser("bob"));
+        //act
+        var response = await _httpClient.PostAsJsonAsync($"api/auctions", auction);
+
+        // assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateAuction_WithValidCreateAuctionDtoAndUser_ShouldReturn200()
+    {
+        // arrange
+        var updateAuction = new UpdateAuctionDto { Make = "updated" };
+        _httpClient.SetFakeJwtBearerToken(AuthHelper.GetBearerForUser("bob"));
+        //act
+        var response = await _httpClient.PutAsJsonAsync($"api/auctions/{GT_ID}", updateAuction);
+
+        // assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateAuction_WithValidCreateAuctionDtoAndInvalidUser_ShouldReturn403()
+    {
+        // arrange
+        var updateAuction = new UpdateAuctionDto { Make = "updated" };
+        _httpClient.SetFakeJwtBearerToken(AuthHelper.GetBearerForUser("notbob"));
+        //act
+        var response = await _httpClient.PutAsJsonAsync($"api/auctions/{GT_ID}", updateAuction);
+
+        // assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
     public Task InitializeAsync() => Task.CompletedTask;
 
