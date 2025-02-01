@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option csharp_namespace = "AuctionService";
 
-service GrpAuction {
+service GrpcAuction {
     rpc GetAuction (GetAuctionRequest) returns (GrpcAuctionResponse);
 }
 
